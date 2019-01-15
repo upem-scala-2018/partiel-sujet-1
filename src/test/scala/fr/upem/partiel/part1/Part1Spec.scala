@@ -44,6 +44,8 @@ class Part1Spec extends FlatSpec with Matchers {
   }
 
   "computeTotalEarnings" should "compute earnings of given assets" in {
+    import Part1.FinancialAssetEarning
+
     val carSale = new CarSale(amount = 15000, horsePower = 5)
     val livretA = new LivretA(amount = 7500)
 

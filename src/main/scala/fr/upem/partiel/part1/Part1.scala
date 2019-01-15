@@ -50,7 +50,7 @@ object Part1 {
   }
 
   // 1.4 bis
-  def indexOf[A](l: List[A], a: A): Option[Int] = {
+  def indexOf2[A](l: List[A], a: A): Option[Int] = {
 
     // Je laisse cette méthode non accessible depuis l'extérieur car c'est un détail d'implémentation
     @tailrec
@@ -150,20 +150,18 @@ object Part1 {
     def computeEarning(a: A): Double
   }
 
-  implicit val CarSaleEarning = new Earning[CarSale] {
-    override def computeEarning(c: CarSale) = c.amount - (CarSale.StateHorsePowerTaxation * c.horsePower)
+  implicit val FinancialAssetEarning = new Earning[FinancialAsset] {
+    override def computeEarning(a: FinancialAsset) = a match {
+      case LivretA(amount) => amount + (amount * LivretA.Rate)
+      case p@Pel(_, _) => PelEarning.computeEarning(p)
+      case CarSale(amount, horsePower) => amount - (CarSale.StateHorsePowerTaxation * horsePower)
+    }
   }
 
-  implicit val PelEarning = new Earning[Pel] {
-    override def computeEarning(p: Pel) = if (Instant.now().minus(4, YEARS).isAfter(p.creation))
-      p.amount + (p.amount * Pel.Rate) + Pel.GovernmentGrant
-    else
-      p.amount + (p.amount * Pel.Rate)
-  }
-
-  implicit val LivretAEarning = new Earning[LivretA] {
-    override def computeEarning(l: LivretA) = l.amount + (l.amount * LivretA.Rate)
-  }
+  val PelEarning: Earning[Pel] = (p: Pel) => if (Instant.now().minus(4, YEARS).isAfter(p.creation))
+    p.amount + (p.amount * Pel.Rate) + Pel.GovernmentGrant
+  else
+    p.amount + (p.amount * Pel.Rate)
 
 
   // 1.12 Rewrite the following function with your typeclass (.5pts)
