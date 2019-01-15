@@ -80,7 +80,7 @@ object Part1 {
   // 1.7 Aggregate valid values (.5pts)
 
   // C'est la même chose que précédemment sauf qu'on applique la fonction keepValid sur la liste
-  def aggregateValid[A](l: List[Either[Error, A]], combine: (A, A) => A, empty: A): A = keepValid(l).foldLeft(empty)(combine)
+  def aggregateValid[A](l: List[Either[Error, A]], combine: (A, A) => A, empty: A): A = aggregate(keepValid(l), combine, empty)
 
   // 1.8 Create the Monoid typeclass and rewrite the above "aggregateValid" (.5pts)
   trait Monoid[A] {
@@ -90,7 +90,7 @@ object Part1 {
   }
 
   // Plus besoin de combine et empty dans la signature, car on les trouve dans Monoid
-  def aggregateValidM[A](l: List[Either[Error, A]])(implicit ev: Monoid[A]): A = keepValid(l).foldLeft(ev.empty)(ev.combine)
+  def aggregateValidM[A](l: List[Either[Error, A]])(implicit ev: Monoid[A]): A = aggregate(keepValid(l), ev.combine, ev.empty)
 
   // 1.9 Implement the Monoid typeclass for Strings and give an example usage with aggregateValidM (.5pts)
   implicit val StringMonoid = new Monoid[String] {
@@ -150,18 +150,22 @@ object Part1 {
     def computeEarning(a: A): Double
   }
 
+  object FlatRateAsset {
+    def computeEarnings(amount: Double, rate: Double): Double = amount + (amount * rate)
+  }
+
   implicit val FinancialAssetEarning = new Earning[FinancialAsset] {
     override def computeEarning(a: FinancialAsset) = a match {
-      case LivretA(amount) => amount + (amount * LivretA.Rate)
+      case LivretA(amount) => FlatRateAsset.computeEarnings(amount, LivretA.Rate)
       case p@Pel(_, _) => PelEarning.computeEarning(p)
       case CarSale(amount, horsePower) => amount - (CarSale.StateHorsePowerTaxation * horsePower)
     }
   }
 
   val PelEarning: Earning[Pel] = (p: Pel) => if (Instant.now().minus(4, YEARS).isAfter(p.creation))
-    p.amount + (p.amount * Pel.Rate) + Pel.GovernmentGrant
+    FlatRateAsset.computeEarnings(p.amount, Pel.Rate) + Pel.GovernmentGrant
   else
-    p.amount + (p.amount * Pel.Rate)
+    FlatRateAsset.computeEarnings(p.amount, Pel.Rate)
 
 
   // 1.12 Rewrite the following function with your typeclass (.5pts)
