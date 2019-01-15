@@ -11,6 +11,7 @@ class StreamSpec extends FlatSpec with Matchers {
   "Stream" should "run simple movie serialization stream" in {
 
     import Stream.{materializer, system}
+    import Stream.MovieShow
 
     val source = Stream.sourceOf(
       List(
@@ -28,7 +29,7 @@ class StreamSpec extends FlatSpec with Matchers {
       .request(4)
       .expectNext(
         "Alien is an english movie directed by Ridley Scott in 1979",
-        "Nikia is a french movie directed by Luc Besson in 1990",
+        "Nikita is a french movie directed by Luc Besson in 1990",
         "Taxi Driver is an american movie directed by Martin Scorsese in 1976",
         "The Dreamers is an italian movie directed by Bernardo Bertolucci in 2003"
       )
